@@ -54,15 +54,18 @@ draw();
 const moveShooter = (e) => {
     squares[currentShooterPos].classList.remove('shooter');
     if (e.keyCode === 39) {
-        if (currentShooterPos < 255) {
+        if (currentShooterPos % screenWidth <= 13) {
+
+            console.log("currentShooterPos % screenWidth :", currentShooterPos % screenWidth)
             currentShooterPos++;
         }
     } else if (e.keyCode === 37) {
-        if (currentShooterPos > 0) {
+        if (currentShooterPos % screenWidth >= 1) {
+            console.log("currentShooterPos % screenWidth :", currentShooterPos % screenWidth)
             currentShooterPos--;
         }
     }
-    draw();
+    squares[currentShooterPos].classList.add('shooter');
 }
 
 document.addEventListener('keydown', moveShooter);
