@@ -32,3 +32,8 @@
   background-color: blue;
   border-radius: 10px 10px 0px 0px;
 }
+
+.laser{
+  background-color: black;
+  border-radius: 10px;
+}

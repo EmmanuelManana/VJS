@@ -1,8 +1,18 @@
+"use strict"
 const grid = document.querySelector(".grid");
-var currentShooterPos = 245;
+const score = document.querySelector('.score')
+let currentShooterPos = 245;
 const screenWidth = 15;
-var enemyMovingRight = true;
-var direction = 1; // initially moves to the right;
+let enemyMovingRight = true;
+let direction = 1; // initially moves to the right;
+let enemiesLoop;
+let enemies = [];
+let counter = 0;
+
+
+
+let resultsDisplay = document.querySelector('.results')
+
 
 const addingTiles = () => {
   for (let i = 0; i < 255; i++) {
@@ -31,11 +41,17 @@ const alienInvaders = [
 
 const drawEnemies = () => {
   for (let i = 0; i < alienInvaders.length; i++) {
-    const targetDiv = squares[alienInvaders[i]];
-    targetDiv.classList.add("enemy");
-    // targetDiv.innerHTML = 'e'
+
+    if (!enemies.includes(i)) {
+      const targetDiv = squares[alienInvaders[i]];
+      targetDiv.classList.add("enemy");
+      // targetDiv.innerHTML = 'e'
+    }
+
   }
 };
+
+drawEnemies();
 
 const removeEnemies = () => {
   for (let i = 0; i < alienInvaders.length; i++) {
@@ -49,12 +65,8 @@ const drawShooter = () => {
   squares[currentShooterPos].classList.add("shooter");
 };
 
-const draw = () => {
-  drawEnemies();
-  drawShooter();
-};
+drawShooter()
 
-draw();
 
 const moveShooter = (e) => {
   squares[currentShooterPos].classList.remove("shooter");
@@ -82,34 +94,81 @@ const moveShooter = (e) => {
 document.addEventListener("keydown", moveShooter);
 
 const moveEnemies = () => {
-  const leftEdge  = alienInvaders[0] % screenWidth === 0;
+  const leftEdge = alienInvaders[0] % screenWidth === 0;
   const rightEdge = alienInvaders[alienInvaders.length - 1] % screenWidth === screenWidth - 1;
-  console.log("rightEdge :", rightEdge);
   removeEnemies();
 
   if (rightEdge && enemyMovingRight) {
     for (let i = 0; i < alienInvaders.length; i++) {
       alienInvaders[i] += screenWidth + 1;
-      enemyMovingRight = false;
       direction = -1;
+      enemyMovingRight = false;
     }
   }
 
-  if (leftEdge && !enemyMovingRight){
+  if (leftEdge && !enemyMovingRight) {
     for (let i = 0; i < alienInvaders.length; i++) {
-        alienInvaders[i] += screenWidth - 1;
-        enemyMovingRight = true;
-        direction = 1;
-      }
+      alienInvaders[i] += screenWidth - 1;
+      direction = 1;
+      enemyMovingRight = true;
+    }
   }
 
-  // move every enemy to the right.
   for (let i = 0; i < alienInvaders.length; i++) {
     // move in this direction
     alienInvaders[i] += direction;
   }
 
-  drawEnemies();
+  drawEnemies()
+
+  // console.log(squares[currentShooterPos].classList.contains('enemy', 'shooter'))
+  if (squares[currentShooterPos].classList.contains('enemy')) {
+
+    resultsDisplay.innerHTML = 'GAME OVER'
+    clearInterval(enemiesLoop)
+  }
+  if (enemies.length === alienInvaders.length){
+    resultsDisplay.innerHTML = "You win";
+    clearInterval(enemiesLoop)
+  }
 };
+
+
 // game loop
-setInterval(moveEnemies, 600);
+enemiesLoop = setInterval(moveEnemies, 500);
+
+const shoot = (e) => {
+  let laserLoop;
+  let currentLaserPos = currentShooterPos;
+
+
+  const moveLaser = () => {
+    squares[currentLaserPos].classList.remove('laser')
+    currentLaserPos -= screenWidth;
+    squares[currentLaserPos].classList.add('laser')
+
+    if (squares[currentLaserPos].classList.contains('enemy')) {
+      squares[currentLaserPos].classList.remove('enemy')
+      squares[currentLaserPos].classList.remove('laser')
+
+      // TODO: add explosion on collision.
+    
+      clearInterval(laserLoop)
+      let removedEnemy = alienInvaders.indexOf(currentLaserPos)
+      enemies.push(removedEnemy)
+      counter++;
+      console.log("enemies shot: ", enemies)
+    }
+
+  }
+  score.innerHTML = counter;
+
+ 
+  switch (e.key) {
+    case 'ArrowUp':
+      laserLoop = setInterval(moveLaser, 100)
+  }
+
+}
+
+document.addEventListener('keydown', shoot)
